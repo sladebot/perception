@@ -30,9 +30,10 @@ def svd(X, ranks):
 
 
 def main():
-    plt.rcParams["figure.figsize"] = [16, 8]
+    # plt.rcParams["figure.figsize"] = [16, 8]
     A = imread('images/svd.jpeg')
     X = np.mean(A, -1)
+    print(X.shape)
     img = plt.imshow(256 - X)
     img.set_cmap('gray')
     plt.axis('off')
