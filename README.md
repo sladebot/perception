@@ -16,10 +16,13 @@ Usage:
 `detector.track_on_webcam()` is used to access the webcam, it matches the descriptors and finds the homography matrix `H`, 
 and applies it with a bounding box. Here's an example:
 
+![Screen Shot 2021-08-10 at 4 25 12 PM](https://user-images.githubusercontent.com/1413154/128947505-0eb47c78-fd39-4ab2-974b-eee89b26cbef.png)
+
 
 `detector.detect("<target-image-path>") # e.g. - images/detect_book.jpg` uses the target image to match with the query image
 with which the detector was initialized. After finding matching descriptors, it draws lines between them. Here's an example:
 
+![Screen Shot 2021-08-10 at 4 24 24 PM](https://user-images.githubusercontent.com/1413154/128947520-15e316bc-e3d7-401c-8245-8e263f2a6f7f.png)
 
 
 ### Section 2: Single Value Decomposition
