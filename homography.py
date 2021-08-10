@@ -3,8 +3,11 @@ import numpy as np
 
 
 class Detector:
-    def __init__(self):
+    def __init__(self, query_img):
         self.cam = cv2.VideoCapture(0)
+        self.query_img = cv2.imread(query_img)
+        self.h, self.w, _ = self.query_img.shape
+        self.query_img_bw = cv2.cvtColor(self.query_img, cv2.COLOR_BGR2GRAY)
 
     def get_frame(self, mirror=False):
         _, img = self.cam.read()
@@ -13,33 +16,41 @@ class Detector:
         cv2.imshow('Webcam', img)
         return img
 
-    def detect(self, query_img, train_img):
-        query_img = cv2.imread(query_img)
+    def detect(self, train_img, show_descriptors=False):
         train_img = cv2.imread(train_img)
-        query_img_bw = cv2.cvtColor(query_img, cv2.COLOR_BGR2GRAY)
         train_img_bw = cv2.cvtColor(train_img, cv2.COLOR_BGR2GRAY)
+        FLANN_INDEX_LSH = 6
+        index_params = dict(algorithm=FLANN_INDEX_LSH,
+                            table_number=12,
+                            key_size=20,
+                            multi_probe_level=2)
+
+        search_params = dict(checks=50)  # or pass empty dictionary
         orb = cv2.ORB_create()
-        queryKeypoints, queryDescriptors = orb.detectAndCompute(query_img_bw, None)
+        queryKeypoints, queryDescriptors = orb.detectAndCompute(self.query_img_bw, None)
         trainKeypoints, trainDescriptors = orb.detectAndCompute(train_img_bw, None)
 
-        matcher = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-        matches = matcher.match(queryDescriptors, trainDescriptors)
-
+        flann = cv2.FlannBasedMatcher(index_params, search_params)
+        matches = flann.match(queryDescriptors, trainDescriptors)
         matches = sorted(matches, key=lambda x: x.distance)
-        cv2.drawKeypoints(query_img, queryKeypoints, query_img)
-        cv2.drawKeypoints(train_img, trainKeypoints, train_img)
-        cv2.imshow("Train img", train_img)
-        cv2.imshow("Query img", query_img)
-        final_img = cv2.drawMatches(query_img, queryKeypoints, train_img, trainKeypoints, matches[:80], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-        final_img = cv2.resize(final_img, (1000, 650))
 
-        cv2.imshow("matches", final_img)
-        cv2.waitKey(10000)
+        if show_descriptors:
+            cv2.drawKeypoints(self.query_img, queryKeypoints, self.query_img)
+            cv2.drawKeypoints(train_img, trainKeypoints, train_img)
+            cv2.imshow("Train img", train_img)
+            cv2.imshow("Query img", self.query_img)
+        final_img = cv2.drawMatches(self.query_img, queryKeypoints, train_img, trainKeypoints, matches[:50]
+                                    , None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+        while True:
+            cv2.imshow("matches", final_img)
+            if cv2.waitKey(1) == 27:
+                break  # esc to quit
+        cv2.destroyAllWindows()
 
-    def track_on_webcam(self, detector_image="images/detect.jpg"):
-        img = cv2.imread(detector_image, cv2.IMREAD_GRAYSCALE)
+    def track_on_webcam(self):
+        # img = cv2.imread(detector_image, cv2.IMREAD_GRAYSCALE)
         sift = cv2.xfeatures2d.SIFT_create()
-        kp_image, desc_image = sift.detectAndCompute(img, None)
+        kp_image, desc_image = sift.detectAndCompute(self.query_img, None)
         FLANNINDEXKDTREE = 1
         index_params = dict(algorithm=FLANNINDEXKDTREE, trees=5)
         search_params = dict(checks=50)
@@ -65,8 +76,7 @@ class Detector:
 
                 matrix, mask = cv2.findHomography(query_pts, train_pts, cv2.RANSAC, 5.0)
                 # matches_mask = mask.ravel().tolist()
-                h, w = img.shape
-                pts = np.float32([[0, 0], [0, h], [w, h], [w, 0]]).reshape(-1, 1, 2)
+                pts = np.float32([[0, 0], [0, self.h], [self.w, self.h], [self.w, 0]]).reshape(-1, 1, 2)
                 dst = cv2.perspectiveTransform(pts, matrix)
                 homography = cv2.polylines(frame, [np.int32(dst)], True, (255, 0, 0), 3)
                 cv2.drawKeypoints(image=frame, keypoints=kp_frame, outImage=frame)
@@ -79,5 +89,6 @@ class Detector:
 
 
 if __name__ == "__main__":
-    d = Detector()
-    d.detect(query_img="images/detect.jpg", train_img="images/detect_book.jpg")
+    d = Detector("images/detect.jpg")
+    d.track_on_webcam()
+    # d.detect("images/detect_book.jpg")
