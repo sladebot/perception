@@ -10,6 +10,10 @@ class Detector:
         self.query_img_bw = cv2.cvtColor(self.query_img, cv2.COLOR_BGR2GRAY)
 
     def get_frame(self, mirror=False):
+        """
+        Returns a frame from the webcam
+        @param mirror: bool
+        """
         _, img = self.cam.read()
         if mirror:
             img = cv2.flip(img, 1)
@@ -17,6 +21,10 @@ class Detector:
         return img
 
     def detect(self, train_img, show_descriptors=False):
+        """
+        @param train_img: string - Image to compare with the self.query_image
+        @param show_descriptors: bool - Enable showing descriptors
+        """
         train_img = cv2.imread(train_img)
         train_img_bw = cv2.cvtColor(train_img, cv2.COLOR_BGR2GRAY)
         FLANN_INDEX_LSH = 6
@@ -48,7 +56,6 @@ class Detector:
         cv2.destroyAllWindows()
 
     def track_on_webcam(self):
-        # img = cv2.imread(detector_image, cv2.IMREAD_GRAYSCALE)
         sift = cv2.xfeatures2d.SIFT_create()
         kp_image, desc_image = sift.detectAndCompute(self.query_img, None)
         FLANNINDEXKDTREE = 1

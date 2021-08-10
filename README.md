@@ -1,6 +1,28 @@
 # Perception
 
-#### Section: Single Value Decomposition
+### Section 1: Camera Calibration
+
+### Section 1: Homography & Tracking
+
+We use SIFT & ORB as feature detectors to get matching descriptors between a given image that we're matching with another 
+image or with the live webcam.
+
+Usage: 
+
+```
+    detector = Detector("<query-image-path>") # images/detect.jpg as an example
+```
+
+`detector.track_on_webcam()` is used to access the webcam, it matches the descriptors and finds the homography matrix `H`, 
+and applies it with a bounding box. Here's an example:
+
+
+`detector.detect("<target-image-path>") # e.g. - images/detect_book.jpg` uses the target image to match with the query image
+with which the detector was initialized. After finding matching descriptors, it draws lines between them. Here's an example:
+
+
+
+### Section 2: Single Value Decomposition
 
 We will try a Single Value Decomposition on an image with variable
 ranks to see how much information is being stored at each rank for image compression.
