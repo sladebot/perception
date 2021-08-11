@@ -9,7 +9,7 @@ image or with the live webcam.
 
 Usage: 
 
-```
+```python
     detector = Detector("<query-image-path>") # images/detect.jpg as an example
 ```
 
