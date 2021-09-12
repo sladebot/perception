@@ -1,7 +1,5 @@
 # Perception
 
-### Section 1: Camera Calibration
-
 ### Section 1: Homography & Tracking
 
 We use SIFT & ORB as feature detectors to get matching descriptors between a given image that we're matching with another 
